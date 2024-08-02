@@ -1,5 +1,6 @@
 import sys
 import os
+import uuid
 from dotenv import load_dotenv
 from fastapi.routing import APIRoute
 
@@ -15,3 +16,6 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 
 def env(var: str) -> any:
     return os.environ.get(var)
+
+def gen_uuid() -> uuid:
+    return uuid.uuid4()

@@ -1,0 +1,12 @@
+PROJECT_NAME = "MOVIE LISTING APP"
+API_VERSION_STR = "/api/v1"
+DATABASE_URL = "postgresql://postgres:eminem@localhost/altschool_capstone"
+SECRET_KEY = 'lucky'
+JWT_ALGORITHM = 'HS256'
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SENTRY_DSN = 'http://localhost'
+CORS = [
+    "http://localhost:3000",
+]
+
+
