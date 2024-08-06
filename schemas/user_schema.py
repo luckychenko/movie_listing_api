@@ -1,15 +1,20 @@
-from typing import Optional
-from uuid import UUID
-from pydantic import UUID4, BaseModel, ConfigDict , EmailStr, Field
+from typing import List, Optional, Union
+from pydantic import UUID4, BaseModel, ConfigDict , EmailStr, Field, field_validator
+
+from schemas import ResponseBase
 
 
 
 class UserBase(BaseModel):
-    email: EmailStr = Field(..., max_length=255, description="User Email Adrress")
+    email: EmailStr = Field(..., max_length=255, description="User Email Address")
     full_name: Optional[str] = Field(default=None, max_length=255, description="User Fullname")
 
+class UserLogin(BaseModel):
+    email: EmailStr = Field(..., max_length=255, description="User Email Address")
+    password: str = Field(..., min_length=8, max_length=40, description="User secret password")
+
 class UserCreate(UserBase):
-    password: str = Field(min_length=8, max_length=40, description="User secret password")
+    password: str = Field(..., min_length=8, max_length=40, description="User secret password")
 
 class UserUpdate(UserCreate):
     pass
@@ -22,14 +27,17 @@ class UserInDB(UserBase):
     hashed_password: str
 
 class User(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: UUID4
 
+
+class UserOut(UserBase):
     model_config = ConfigDict(from_attributes=True)
+    
+    user_id: UUID4    
 
-class UserResponse(UserBase):
-    user_id: UUID
 
-class UsersPublic(BaseModel):
-    data: list[UserResponse]
-    count: int
+class UserResponse(ResponseBase):    
+    data: Optional[Union[UserOut,List[UserOut]]] = None

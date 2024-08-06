@@ -14,11 +14,11 @@ class MovieUpdate(MovieBase):
     user_id: int
 
 class Movie(MovieBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     uuid: UUID4
-
-    class Config:
-        model_config = ConfigDict(from_attributes=True)
+    
 
 class MovieResponse(MovieUpdate):
     rating: int

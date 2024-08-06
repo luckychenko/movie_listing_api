@@ -5,7 +5,7 @@ from datetime import timedelta
 from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request as request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 # from dotenv import load_dotenv
@@ -16,7 +16,7 @@ from core.config import settings
 from crud import user_crud
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_VERSION_STR}/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{request.base_url}/login")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -33,7 +33,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.datetime.now(datetime.UTC) + expires_delta
     else:
         expire = datetime.datetime.now(datetime.UTC) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
+    to_encode.update({"expires": expire.isoformat()})
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
     return encoded_jwt
 

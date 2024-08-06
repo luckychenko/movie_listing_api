@@ -15,7 +15,7 @@ from logger import logger
 from core.config import settings
 from core.database import Base, engine
 from core.utils import custom_generate_unique_id
-from routers.controller import router
+from routers.controller_v1 import routerv1
 
 from models import *
 
@@ -23,27 +23,27 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    # openapi_url=f"{settings.API_VERSION_STR}/openapi.json",
+    # openapi_url=f"{settings.API_DOC_URL}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
     ) 
 
-# # middleware for logging
-# app.add_middleware(BaseHTTPMiddleware, dispatch=movie_middleware)
+# middleware for logging
+app.add_middleware(BaseHTTPMiddleware, dispatch=movie_middleware)
 
-# # Set all CORS enabled origins
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=[
-#         str(origin).strip("/") for origin in settings.CORS 
-#     ],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],  
-# )
+# Set all CORS enabled origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        str(origin).strip("/") for origin in settings.CORS 
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],  
+)
 
-# logger.info("starting app")
+logger.info("starting app")
 
-app.include_router(router, prefix='/api') 
+app.include_router(routerv1, prefix='/api') 
 
 
 
