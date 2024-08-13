@@ -41,7 +41,7 @@ app.add_middleware(
     allow_headers=["*"],  
 )
 
-logger.info("starting app")
+# logger.info("starting app")
 
 app.include_router(routerv1, prefix='/api') 
 

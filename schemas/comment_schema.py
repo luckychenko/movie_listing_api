@@ -1,7 +1,9 @@
 
 from pydantic import BaseModel, ConfigDict, Field, UUID4
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime
+
+from schemas import ResponseBase
 
 # from sqlalchemy import UUID
 
@@ -11,8 +13,8 @@ class CommentBase(BaseModel):
 
 class CommentCreate(CommentBase):   
     movie_id: str = Field(..., description="The ID of the movie being commented")
-    user_id: str = Field(..., description="The ID of the user who comment the movie") 
-    parent: Optional[int]  = Field(default=None, description="The ID of the parent comment, if any")
+    # user_id: str = Field(..., description="The ID of the user who comment the movie") 
+    parent_id: Optional[int]  = Field(default=0, description="The ID of the parent comment, if any")
     # date_created: datetime = Field(..., default=datetime(), max_length=255, description="The Comment created date)")
 
 class CommentUpdate(CommentCreate):
@@ -22,19 +24,20 @@ class Comment(CommentBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int = Field(..., description="The ID of the Comment")
-    uuid: UUID4 = Field(..., description="The UUID of the Comment")
+    cuid: UUID4 = Field(..., description="The UUID of the Comment")
     date_created: datetime = Field(..., description="The date the comment was created")
     date_updated: Optional[datetime] = Field(None, description="The date the comment was last updated")
 
 
-
-class CommentResponse(CommentBase):
-    uuid: UUID4 = Field(..., description="The UUID of the comment")
-    movie_id: int = Field(..., description="The ID of the movie")
-    user_id: int = Field(..., description="The ID of the user")
-    date_created: datetime = Field(..., description="The date the comment was created")
-    date_updated: Optional[datetime] = Field(None, description="The date the comment was last updated")
+class CommentOut(CommentBase):
+    cuid: UUID4 
+    movie_id: UUID4 
+    user_id: UUID4 
+    parent_id: Optional[int] = None
+    replies: List["CommentOut"] = []
+    date_created: datetime 
+    date_updated: Optional[datetime] 
     
-class CommentsPublic(BaseModel):
-    data: list[CommentResponse]
-    count: int
+
+class CommentResponse(ResponseBase):    
+    data: Optional[CommentOut | List[CommentOut]] = None

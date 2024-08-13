@@ -13,7 +13,8 @@ class Settings(BaseSettings):
     TEST_DATABASE_URL: str
     CORS: str
     API_LATEST_VERSION: int
- 
+    API_DEFAULT_VERSION: str
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

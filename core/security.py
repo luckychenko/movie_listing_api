@@ -5,18 +5,18 @@ from datetime import timedelta
 from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, Request as request
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 # from dotenv import load_dotenv
 
 
-from core.database import SessionLocal, get_db 
+from core.database import get_db 
 from core.config import settings
 from crud import user_crud
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{request.base_url}/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_DEFAULT_VERSION}/login")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -39,13 +39,13 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
-        status_code=401,
+        status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-        email: str = payload.get("data")
+        email: str = payload.get("email")
         if not email:
             raise credentials_exception
     except JWTError:

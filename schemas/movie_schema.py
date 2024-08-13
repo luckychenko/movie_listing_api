@@ -1,5 +1,9 @@
-from typing import Optional
+from datetime import datetime
+from typing import List, Optional, Union
 from pydantic import BaseModel, ConfigDict , Field, UUID4
+
+from schemas import ResponseBase
+from schemas.user_schema import UserOut
 # from uuid import UUID
 
 class MovieBase(BaseModel):
@@ -7,22 +11,29 @@ class MovieBase(BaseModel):
     description: Optional[str] = Field(default=None, max_length=255, description="The movie description")
     
 class MovieCreate(MovieBase):
-    user_id: int
+    pass
 
 class MovieUpdate(MovieBase):
-    uuid: UUID4
-    user_id: int
+    title: Optional[str] = Field(..., max_length=255, description="The movie title")
+    
 
 class Movie(MovieBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    uuid: UUID4
+    muid: UUID4
     
 
-class MovieResponse(MovieUpdate):
-    rating: int
+class MovieOut(MovieBase):
+    muid: UUID4
+    # rating: Optional[int] = None
+    date_created: datetime
+    date_updated: Optional[datetime] = None
+    user: UserOut
 
-class MoviesPublic(BaseModel):
-    data: list[MovieResponse]
-    count: int
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class MovieResponse(ResponseBase):    
+    data: Optional[MovieOut | List[MovieOut]] = None
+    

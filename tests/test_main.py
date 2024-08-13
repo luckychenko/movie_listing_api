@@ -32,44 +32,25 @@ def override_get_db():
 
 app.dependency_overrides[get_db] = override_get_db
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def client():
     with TestClient(app) as c:
         yield c
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def setup_database():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
+    # delete the temp files created while running tests
+    if os.path.exists("tests/test_token.txt"):
+        os.remove("tests/test_token.txt")
+    if os.path.exists("tests/test_movie.txt"):
+        os.remove("tests/test_movie.txt")
 
-
-
-
-# @pytest.mark.parametrize("email, password", [("testuser", "testpassword")])
-# def test_get_books(client, setup_database, email, password):
-#     response = client.post("/login", data={"email": email, "password": password})
-#     assert response.status_code == 200
-#     token = response.json()["access_token"]
-
-#     # Then, get the books
-#     response = client.get("/books/")
-#     assert response.status_code == 401
-#     response = client.get("/books/", headers={"Authorization": f"Bearer {token}"})
-#     assert response.status_code == 200
-#     data = response.json()
-#     assert "data" in data
-
-# @pytest.mark.parametrize("email, password", [("testuser", "testpassword")])
-# def test_create_book(client, setup_database, email, password):
-#     response = client.post("/login", data={"email": email, "password": password})
-#     assert response.status_code == 200
-#     token = response.json()["access_token"]
-
-#     # Then, create a book
-#     book_data = {"title": "Test Book", "author": "Test Author", "description": "A good book"}
-#     response = client.post("/books", json=book_data, headers={"Authorization": f"Bearer {token}"})
-#     assert response.status_code == 200
-#     data = response.json()
-#     assert data["message"] == "success"
-#     assert data['data']['title'] == "Test Book"
+# make test run in the below order, 
+# to allow test_Auth run first soo, user signup and token can be generated
+# and then movie can be created 
+pytest.main(['test_auth.py'])
+pytest.main(['test_movie.py'])
+pytest.main(['test_rating.py'])

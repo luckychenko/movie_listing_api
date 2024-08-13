@@ -8,20 +8,19 @@ class Comment(Base):
     __tablename__ = "comments"
 
     id = Column(Integer, primary_key=True, index=True)
-    uuid = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, index=True, nullable=False)
+    # cuid = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, index=True, nullable=False)
     movie_id = Column(Integer, ForeignKey('movies.id'), nullable=False, index=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
     content = Column(String, nullable=False)    
-    parent = Column(Integer, nullable=True, index=True)  
+    parent_id = Column(Integer, ForeignKey("comments.id"), nullable=True, index=True)  
     date_created = Column(DateTime, nullable=False, server_default=func.now())  
     date_updated = Column(DateTime, nullable=True, onupdate=func.now())
 
     movie = relationship("Movie", back_populates="comments", lazy='selectin') 
     user = relationship("User", back_populates="comments", lazy='selectin') 
+    replies = relationship("Comment", back_populates="parent", lazy="selectin", cascade="all, delete-orphan")
 
-    __table_args__ = (
-        Index('ix_comments_movie_user', 'movie_id', 'user_id'),
-    )
+    parent = relationship("Comment", remote_side=[id], back_populates="replies")
 
     def __repr__(self):
-        return f"<Comment(comment={self.comment}, movie_id={self.movie_id})>"
+        return f"<Comment(content={self.content}, id={self.id}, parent_id={self.parent_id})>"
