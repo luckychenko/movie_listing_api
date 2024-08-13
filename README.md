@@ -83,7 +83,8 @@ This project is a FastAPI application designed to manage movies, ratings, commen
     ```bash
     uvicorn main:app --reload  
     or
-    fastapi dev
+    fastapi dev # for development
+    fastapi run # for production
     ```
 
 2. **Run Alembic migrations:**
