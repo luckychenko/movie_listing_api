@@ -29,7 +29,7 @@ def rate_movie(payload: rating_schema.RatingCreate,  user: user_schema.User = De
     
     res = rating_crud.rate_movie(db, payload.score, movie.id, user.id)
     #format output data
-    data = rating_schema.RatingOut(ruid=res.ruid, movie_id=movie.muid, score=res.score, user=res.user)
+    data = rating_schema.RatingOut(id=res.id, movie_id=movie.muid, score=res.score, user=res.user)
     # log activity
     logger.info(f"User {user.full_name}({user.email}) Rated movie ({movie.title})")
     return {'message': "Movie Rated", 'data': data}

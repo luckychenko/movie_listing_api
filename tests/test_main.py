@@ -48,9 +48,5 @@ def setup_database():
     if os.path.exists("tests/test_movie.txt"):
         os.remove("tests/test_movie.txt")
 
-# make test run in the below order, 
-# to allow test_Auth run first soo, user signup and token can be generated
-# and then movie can be created 
-pytest.main(['test_auth.py'])
-pytest.main(['test_movie.py'])
-pytest.main(['test_rating.py'])
+
+

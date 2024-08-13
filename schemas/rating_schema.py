@@ -18,11 +18,11 @@ class Rating(RatingBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int = Field(..., description="The ID of the rating")
-    ruid: UUID4 = Field(..., description="The UUID of the Comment")
+    # ruid: UUID4 = Field(..., description="The UUID of the Comment")
     user_id: int = Field(..., description="The ID of the user rating the movie")
 
 class RatingOut(RatingBase):  
-    ruid: UUID4 
+    id: int 
     movie_id: UUID4 
     score: Optional[float] = None
     user: UserOut

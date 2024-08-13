@@ -10,6 +10,7 @@ from core.database import get_db
 from crud import comment_crud, movie_crud
 from schemas import comment_schema, user_schema
 from core.security import get_current_user
+from core.utils import to_pydantic
 
 comment_router = APIRouter()
 
@@ -21,7 +22,22 @@ def add_comment(payload: comment_schema.CommentCreate,  user: user_schema.User =
     if not movie:        
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie you are trying to comment on does not exist")
     
+    # supports nested commenting (reply to a comment)
     db_comment = comment_crud.post_comment(db, payload, movie.id, user.id)
     # log activity
     logger.info(f"User {user.full_name}({user.email}) Commented on ({movie.title})")
-    return {'message': "Success", 'data': db_comment}
+    return {'message': "Comment Added", 'data': db_comment}
+
+
+@comment_router.get("/{movie_id}", status_code=status.HTTP_200_OK,  response_model=comment_schema.CommentResponse)
+def get_comments(movie_id: UUID4, offset: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    # confirm movie is in DB
+    movie = movie_crud.get_movie(db, movie_id)
+    if not movie:         
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
+    
+    res = comment_crud.get_movie_comments(db, movie.id, offset, limit)
+    # Convert result to a list of dictionaries
+    data = [comment_schema.CommentOut.model_validate(comment) for comment in res]    
+    return {'message': "Success", 'data': data}
+    

@@ -14,8 +14,12 @@ def test_rate_movie(client, setup_database, ver):
                            json={"title": "Oliver Twist", "description": "Lorem Ipsum"}, 
                            headers={"Authorization": f"Bearer {token}"}
                            )
-    
-    movie_id = response.json()['data']['muid']
+    data1 = response.json()
+    movie_id = data1['data']['muid']
+    assert data1["message"] == "Movie Added"
+    assert data1['data']['title'] == "Oliver Twist"  
+
+    # test rate movie
     response = client.post(f"{ver}/rate", 
                            json={"score": 7.5,  "movie_id": movie_id}, 
                            headers={"Authorization": f"Bearer {token}"}
@@ -23,7 +27,6 @@ def test_rate_movie(client, setup_database, ver):
     assert response.status_code == 201
     data = response.json()
     assert data["message"] == "Movie Rated"
-    assert "ruid" in data ['data'] 
        
     # write created movie id to temp file
     with open("tests/test_movie.txt", "w") as f:
