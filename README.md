@@ -1,6 +1,3 @@
-Certainly! Here’s a detailed `README.md` template for your FastAPI project, incorporating elements from our previous conversations. Feel free to adjust specific details as needed.
-
----
 
 # FastAPI Project
 
