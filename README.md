@@ -73,6 +73,7 @@ This project is a FastAPI application designed to manage movies, ratings, commen
      ```
      SECRET_KEY=your-secret-key
      ```
+     N.B - A sample-env file is provided
 
 ### Running the Application
 
