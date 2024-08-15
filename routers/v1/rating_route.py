@@ -20,11 +20,15 @@ def rate_movie(payload: rating_schema.RatingCreate,  user: user_schema.User = De
     # confirm movie is in DB
     movie = movie_crud.get_movie(db, payload.movie_id)
     if not movie:        
+        # log activity
+        logger.error(f"{user.email} try to rate non existing movie ({payload.movie_id})")  
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie you are trying to rate does not exist")
     
     # verify if user had already rated same movie
     rated = rating_crud.get_user_movie_rating(db, movie.id, user.id)
-    if rated:        
+    if rated:     
+        # log activity
+        logger.error(f"{user.email} already rated movie ({movie.title})")    
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You already rated this movie")
     
     res = rating_crud.rate_movie(db, payload.score, movie.id, user.id)
@@ -40,6 +44,8 @@ def get_ratings(movie_id: UUID4, db: Session = Depends(get_db)):
     # confirm movie is in DB
     movie = movie_crud.get_movie(db, movie_id)
     if not movie:        
+        # log activity
+        logger.error(f"user trying to rate non existing movie ({movie_id})")  
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie you are trying to rate does not exist")
     
     res = rating_crud.get_movie_ratings(db, movie.id)

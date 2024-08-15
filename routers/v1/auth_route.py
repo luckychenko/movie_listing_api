@@ -15,6 +15,8 @@ def signup(payload: user_schema.UserCreate, db: Session = Depends(get_db)):
     db_user = user_crud.get_user_by_email(db, email=payload.email)
     hashed_password = pwd_context.hash(payload.password)
     if db_user:
+        # log activity
+        logger.error(f"{payload.email} trying to signup, but user exist")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="email already registered")
     # create user record
     res = user_crud.create_user(db=db, user=payload, hashed_password=hashed_password)
@@ -26,6 +28,8 @@ def signup(payload: user_schema.UserCreate, db: Session = Depends(get_db)):
 def login(form_data: user_schema.UserLogin = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
+        # log activity
+        logger.error(f"{form_data.username} trying to login, but user doesn't exist")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",

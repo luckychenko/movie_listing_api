@@ -19,8 +19,10 @@ comment_router = APIRouter()
 def add_comment(payload: comment_schema.CommentCreate,  user: user_schema.User = Depends(get_current_user), db: Session = Depends(get_db)):
     # confirm movie is in DB
     movie = movie_crud.get_movie(db, payload.movie_id)
-    if not movie:        
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie you are trying to comment on does not exist")
+    if not movie:  
+        # log activity
+        logger.error(f"{user.email} trying to comment on non existing movie ({payload.movie_id})")      
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie you are trying to comment on does not exists")
     
     # supports nested commenting (reply to a comment)
     db_comment = comment_crud.post_comment(db, payload, movie.id, user.id)
@@ -33,7 +35,9 @@ def add_comment(payload: comment_schema.CommentCreate,  user: user_schema.User =
 def get_comments(movie_id: UUID4, offset: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     # confirm movie is in DB
     movie = movie_crud.get_movie(db, movie_id)
-    if not movie:         
+    if not movie:   
+        # log activity
+        logger.error(f"user trying to view comment on non existing movie ({movie_id})")        
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
     
     res = comment_crud.get_movie_comments(db, movie.id, offset, limit)

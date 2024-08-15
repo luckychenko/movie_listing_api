@@ -15,6 +15,8 @@ movie_router = APIRouter()
 def add_movie(payload: movie_schema.MovieCreate,  user: user_schema.User = Depends(get_current_user), db: Session = Depends(get_db)):
     db_movie = movie_crud.get_movie_by_title(db, payload.title)
     if db_movie:
+        # log activity
+        logger.error(f"{user.email} trying to create movie titled'{payload.title}' which already exists")  
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Movie with title '{payload.title}' already exists")
     res = movie_crud.create_movie(db, payload, user.id)
     # log activity
@@ -37,6 +39,8 @@ def get_movies(db: Session = Depends(get_db), offset: int = 0, limit: int = 10):
 def get_movie(movie_id: UUID4, db: Session = Depends(get_db)):
     db_movie = movie_crud.get_movie(db=db, muid=movie_id)
     if not db_movie:
+        # log activity
+        logger.error(f"user try to view non existing movie ({movie_id})") 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found" )
     return {'message': "Success", 'data': db_movie}
 
@@ -46,8 +50,12 @@ def update_update(movie_id: UUID4, payload: movie_schema.MovieUpdate, user: user
     # confirm movie is in DB
     movie = movie_crud.get_movie(db, movie_id)
     if not movie:        
+        # log activity
+        logger.error(f"user try to edit non existing movie ({movie_id})") 
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
     if movie.user_id != user.id:
+        # log activity
+        logger.error(f"{user.email} try to edit a movie ({movie_id}) user didn't create") 
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Action forbidden, You are not authorized to modify this movie")
     
     db_movie = movie_crud.update_movie(db, movie, payload)
@@ -60,9 +68,13 @@ def update_update(movie_id: UUID4, payload: movie_schema.MovieUpdate, user: user
 def delete_movie(movie_id: UUID4, db: Session = Depends(get_db), user: user_schema.User = Depends(get_current_user)):
     # confirm movie is in DB
     movie = movie_crud.get_movie(db, movie_id)
-    if not movie:        
+    if not movie:      
+        # log activity
+        logger.error(f"user try to delete non existing movie ({movie_id})")   
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found")
     if movie.user_id != user.id:
+        # log activity
+        logger.error(f"{user.email} try to delete a movie ({movie_id}) user didn't create") 
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Action forbidden, You are not authorized to delete this movie")
     
     movie_crud.delete_movie(db, movie)
