@@ -42,17 +42,17 @@ This project is a FastAPI application designed to manage movies, ratings, commen
 
 2. Create a virtual environment:
     ```bash
-    python -m venv venv
+    python -m venv {env-name}
     ```
 
 3. Activate the virtual environment:
     - On Windows:
       ```bash
-      venv\Scripts\activate
+      {env-name}\Scripts\activate
       ```
     - On macOS/Linux:
       ```bash
-      source venv/bin/activate
+      source {env-name}/bin/activate
       ```
 
 4. Install the dependencies:
